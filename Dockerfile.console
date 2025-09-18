@@ -1,0 +1,30 @@
+# Console version of the application that can run in Docker
+FROM openjdk:8-jdk-alpine
+
+# Install required packages
+RUN apk add --no-cache bash
+
+# Set working directory
+WORKDIR /app
+
+# Create lib directory
+RUN mkdir -p lib build
+
+# Download MySQL Connector JAR
+ADD https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar lib/mysql-connector-java-8.0.33.jar
+
+# Copy source files
+COPY src/ src/
+
+# Compile the application
+RUN javac -cp ".:lib/mysql-connector-java-8.0.33.jar" -d build src/portal/*.java
+
+# Create startup script for console app
+RUN echo '#!/bin/bash' > /app/start-console.sh && \
+    echo 'echo "Waiting for MySQL to be ready..."' >> /app/start-console.sh && \
+    echo 'sleep 10' >> /app/start-console.sh && \
+    echo 'java -cp "build:lib/mysql-connector-java-8.0.33.jar" portal.ConsoleApp' >> /app/start-console.sh && \
+    chmod +x /app/start-console.sh
+
+# Run the console application
+CMD ["/app/start-console.sh"]

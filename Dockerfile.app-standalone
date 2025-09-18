@@ -1,0 +1,37 @@
+# Standalone Java Application with embedded MySQL connector
+FROM openjdk:8-jdk
+
+# Install required packages
+RUN apt-get update && apt-get install -y \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Create directories
+RUN mkdir -p lib build
+
+# Download MySQL Connector JAR directly
+RUN wget -O lib/mysql-connector-java-8.0.33.jar \
+    https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.33/mysql-connector-java-8.0.33.jar
+
+# Copy source files
+COPY src/ src/
+
+# Compile the application with MySQL connector
+RUN javac -cp ".:lib/mysql-connector-java-8.0.33.jar" -d build src/portal/*.java
+
+# Create run script
+RUN echo '#!/bin/bash' > /app/run.sh && \
+    echo 'echo "Starting Insurance Management System..."' >> /app/run.sh && \
+    echo 'echo "Waiting for database connection..."' >> /app/run.sh && \
+    echo 'sleep 5' >> /app/run.sh && \
+    echo 'java -cp "build:lib/mysql-connector-java-8.0.33.jar" portal.Login' >> /app/run.sh && \
+    chmod +x /app/run.sh
+
+# Set display for GUI (X11 forwarding)
+ENV DISPLAY=:0
+
+# Run the application
+CMD ["/app/run.sh"]

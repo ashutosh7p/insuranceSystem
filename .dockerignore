@@ -1,0 +1,34 @@
+# Ignore build directories
+build/
+target/
+out/
+*.class
+
+# Ignore IDE files
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# Ignore logs
+*.log
+
+# Ignore temporary files
+*.tmp
+*.swp
+*~
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Keep source and config files
+!src/
+!*.sql
+!*.xml
+!*.yml
+!*.md
+!*.bat
+!Dockerfile*

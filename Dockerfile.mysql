@@ -1,0 +1,20 @@
+# MySQL Docker configuration for Insurance Management System
+FROM mysql:8.0
+
+# Set environment variables
+ENV MYSQL_ROOT_PASSWORD=root123
+ENV MYSQL_DATABASE=insurance_db
+ENV MYSQL_USER=insurance_user
+ENV MYSQL_PASSWORD=insurance123
+
+# Copy database initialization script
+COPY database_setup.sql /docker-entrypoint-initdb.d/
+
+# Expose MySQL port
+EXPOSE 3306
+
+# Add custom MySQL configuration
+RUN echo '[mysqld]' > /etc/mysql/conf.d/custom.cnf && \
+    echo 'default-authentication-plugin=mysql_native_password' >> /etc/mysql/conf.d/custom.cnf && \
+    echo 'bind-address=0.0.0.0' >> /etc/mysql/conf.d/custom.cnf && \
+    echo 'max_connections=200' >> /etc/mysql/conf.d/custom.cnf

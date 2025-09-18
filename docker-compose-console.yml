@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  mysql-db:
+    build:
+      context: .
+      dockerfile: Dockerfile.mysql
+    container_name: insurance-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: insurance_db
+      MYSQL_USER: insurance_user
+      MYSQL_PASSWORD: insurance123
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database_setup.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - insurance-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot123"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  insurance-console:
+    build:
+      context: .
+      dockerfile: Dockerfile.console
+    container_name: insurance-console
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    environment:
+      DB_HOST: mysql-db
+      DB_PORT: 3306
+      DB_NAME: insurance_db
+      DB_USER: insurance_user
+      DB_PASSWORD: insurance123
+    networks:
+      - insurance-network
+    stdin_open: true
+    tty: true
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  insurance-network:
+    driver: bridge
